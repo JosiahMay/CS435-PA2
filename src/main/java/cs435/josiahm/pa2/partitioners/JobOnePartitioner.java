@@ -10,6 +10,7 @@ import org.apache.hadoop.mapreduce.Partitioner;
  */
 public class JobOnePartitioner extends Partitioner<JobOneKey, StringDoubleValue> {
 
+
   /**
    * Splits the outputs of JobOneMapper to the correct reducers. Words and Ids to one reducer
    * and the output of the TF for a ID to another
@@ -25,11 +26,31 @@ public class JobOnePartitioner extends Partitioner<JobOneKey, StringDoubleValue>
 
     switch (job) {
       case "IDF":
-        return 0 % numReduceTasks;
-      case "TF":
-        return 1 % numReduceTasks;
-      default:
         return 0;
+      case "TF":
+        return getReducerNumber(key, numReduceTasks, 1);
+      default:
+        return 1;
     }
   }
+
+  /**
+   * Selects the next reducer
+   * @param key The doc id
+   * @param numReduceTasks number of reducers to mod by
+   * @param range the minimum number the reducer can be
+   * @return the reducer ID goes to
+   */
+  private int getReducerNumber(JobOneKey key, int numReduceTasks, int range) {
+    // Get the hashCode
+    int rt = key.hashCode() % numReduceTasks;
+
+    // If hash code is the IDF reducer
+    if(rt < range){
+      rt += range;
+    }
+
+    return rt;
+  }
+
 }
