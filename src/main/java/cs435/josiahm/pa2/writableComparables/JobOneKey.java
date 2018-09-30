@@ -14,11 +14,11 @@ public class JobOneKey implements WritableComparable<JobOneKey> {
   /**
    * The value of the key
    */
-  private String key;
+  public String key;
   /**
    * The reducer the key is being sent to
    */
-  private String reducer;
+  public String reducer;
 
   /**
    * Sets the key and reducer

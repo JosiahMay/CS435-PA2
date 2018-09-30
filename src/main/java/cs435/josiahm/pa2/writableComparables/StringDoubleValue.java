@@ -14,11 +14,11 @@ public class StringDoubleValue implements WritableComparable<StringDoubleValue> 
   /**
    * The id od the document
    */
-  private String id;
+  public String id;
   /**
    * The value of the IDF or TF
    */
-  private Double value;
+  public Double value;
 
   /**
    * Sets the id and value
