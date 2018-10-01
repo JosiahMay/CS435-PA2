@@ -86,8 +86,8 @@ public class StringDoubleValue implements WritableComparable<StringDoubleValue> 
 
 
   /**
-   * Compare if two JobOneKey's have the same id The question should not matter because the
-   * partitioner should have already split the JobOneKey's to the correct reducers
+   * Compare if two StringDoubleValue's have the same id The question should not matter because the
+   * partitioner should have already split the StringDoubleValue's to the correct reducers
    *
    * @param o other JobOneKey to check
    * @return if the id's are the same
