@@ -1,3 +1,5 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/15f2ae226bb5a605a7af/maintainability)](https://codeclimate.com/github/JosiahMay/CS435-PA2/maintainability)
+
 # CS435-PA2
 
 
