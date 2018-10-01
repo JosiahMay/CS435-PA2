@@ -47,36 +47,65 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
    */
   public void map(Object key, Text value, Context context)
       throws IOException, InterruptedException {
-    // If string has data
-    if (!value.toString().isEmpty()) {
-      // Check if the ID has not article
-      if(!entry.set(value.toString()))
-      {
-        return;
-      }
-      // Add to the Total ID count
-      context.getCounter(TOTALS.ID).increment(1);
+    // If string has no data
+    if(!isValidDocument(value)) {
+      return;
+    }
 
-      outputKeyTF.setKey(entry.id);
-      // Go through each word
-      while (entry.hasMoreTokens()) {
-        String word = entry.nextToken();
+    // Add to the Total ID count
+    context.getCounter(TOTALS.ID).increment(1);
 
-        // Check if there is a value
-        if(!word.isEmpty())
-        {
-          writeIDF(context, word);
-          addToCount(word);
-        }
-
-      }
-      calculateAndWriteTF(context);
+    outputKeyTF.setKey(entry.id);
+    // Go through each word
+    while (entry.hasMoreTokens()) {
+      processWord(context);
 
     }
+    calculateAndWriteTF(context);
+
     // Clear the counts for new ID
     wordCount.clear();
 
   }
+
+  /**
+   * Process the word by increasing the count of the word and writing the (word, id) for IDf score
+   * if the word was not seen before
+   * @param context were to write for HDFS
+   * @throws IOException unable to write to HDFS
+   * @throws InterruptedException program interrupted
+   */
+  private void processWord(Context context) throws IOException, InterruptedException {
+    String word = entry.nextToken();
+
+    // Check if there is a value
+    if(!word.isEmpty())
+    {
+      writeIDF(context, word);
+      addToCount(word);
+    }
+  }
+
+  /**
+   * Checks to see if the text given is a valid document ie: Not empty and has words in the article
+   * @param value the text to check
+   * @return true if valid, false if text is empty or there is no article
+   */
+  public boolean isValidDocument(Text value){
+    boolean rt = true;
+
+    // If string has no data
+    if (value.toString().isEmpty()) {
+      rt = false;
+    }
+    // Check if the ID has not article
+    if(!entry.set(value.toString())) {
+      rt = false;
+    }
+
+    return rt;
+  }
+
 
   /**
    * Writes a word for IDF count if the word has not been seen before
