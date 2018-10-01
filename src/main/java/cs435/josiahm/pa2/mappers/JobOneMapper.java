@@ -1,6 +1,7 @@
 package cs435.josiahm.pa2.mappers;
 
 import cs435.josiahm.pa2.util.EntryParser;
+import cs435.josiahm.pa2.util.IdCounter.TOTALS;
 import cs435.josiahm.pa2.writableComparables.JobOneKey;
 import cs435.josiahm.pa2.writableComparables.StringDoubleValue;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
     outputKeyIDF.setReducer("IDF");
     outputKeyTF.setReducer("TF");
 
-    outputValueIDF.setId("-1");
+    outputValueIDF.set("-1", 1.0);
 
   }
 
@@ -48,29 +49,50 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
       throws IOException, InterruptedException {
     // If string has data
     if (!value.toString().isEmpty()) {
-      entry.set(value.toString());
+      // Check if the ID has not article
+      if(!entry.set(value.toString()))
+      {
+        return;
+      }
+      // Add to the Total ID count
+      context.getCounter(TOTALS.ID).increment(1);
+
       outputKeyTF.setKey(entry.id);
       // Go through each word
       while (entry.hasMoreTokens()) {
         String word = entry.nextToken();
+
         // Check if there is a value
-        if(!wordCount.containsKey(word))
+        if(!word.isEmpty())
         {
-          outputKeyIDF.setKey(word);
-          outputValueIDF.setValue(1.0);
-          context.write(outputKeyIDF, outputValueIDF);
+          writeIDF(context, word);
+          addToCount(word);
         }
 
-        addToCount(word);
-
       }
-
       calculateAndWriteTF(context);
 
     }
     // Clear the counts for new ID
     wordCount.clear();
 
+  }
+
+  /**
+   * Writes a word for IDF count if the word has not been seen before
+   * @param context how to write to HDFS
+   * @param word The word to write if it has not been seen
+   * @throws IOException unable to write to HDFS
+   * @throws InterruptedException program interrupted
+   */
+  private void writeIDF(Context context, String word)
+      throws IOException, InterruptedException {
+    // Check if the word has not already been seen in the article
+    if(!wordCount.containsKey(word))
+    {
+      outputKeyIDF.setKey(word);
+      context.write(outputKeyIDF, outputValueIDF);
+    }
   }
 
   /**
@@ -96,6 +118,7 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
   private Double getMaxCount() {
     Double maxCount = new Double(0);
 
+    // Find the word with the highest count
     for (Entry word: wordCount.entrySet()) {
       Double current = (Double) word.getValue();
       if(current > maxCount){

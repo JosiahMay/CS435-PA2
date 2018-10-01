@@ -124,6 +124,11 @@ public class StringDoubleValue implements WritableComparable<StringDoubleValue> 
 
     return compare;
   }
+
+  @Override
+  public String toString(){
+    return id + "\t" + value;
+  }
 }
 
 

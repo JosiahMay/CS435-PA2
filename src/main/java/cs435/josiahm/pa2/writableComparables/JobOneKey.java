@@ -1,6 +1,6 @@
 package cs435.josiahm.pa2.writableComparables;
 
-import com.sun.istack.NotNull;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -110,4 +110,9 @@ public class JobOneKey implements WritableComparable<JobOneKey> {
     return this.key.compareTo(o.key);
   }
 
+
+  @Override
+  public String toString(){
+    return key;
+  }
 }

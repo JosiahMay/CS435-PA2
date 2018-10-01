@@ -14,11 +14,17 @@ public class EntryParser {
   /**
    * Sets the id and tokenizer for article
    * @param entry article to parse
+   * @return if the ID has an article
    */
-  public void set(String entry){
+  public boolean set(String entry){
     String[] parts = entry.split("<====>");
+    // If the ID does not have 3 part it is not a complete article
+    if(parts.length != 3)
+      return false;
+
     id = parts[1];
-    words = new StringTokenizer(parts[2].replaceAll("[^A-Za-z0-9]", "").toLowerCase());
+    words = new StringTokenizer(parts[2]);
+    return true;
   }
 
   /**
@@ -34,7 +40,7 @@ public class EntryParser {
    * @return the next word, lower case and only alpha numeric characters
    */
   public String nextToken(){
-    return words.nextToken();
+    return words.nextToken().replaceAll("[^A-Za-z0-9]", "").toLowerCase();
   }
 
 }
