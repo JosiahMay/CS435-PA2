@@ -91,25 +91,38 @@ public class JobOneReducer extends Reducer<JobOneKey, StringDoubleValue, Text, D
       throws IOException, InterruptedException {
 
     // Check if we just need to write the TF values
-    if (key.reducer.equals(TF)) {
-      // Go through all the words for the ID
-      for (StringDoubleValue item : values) {
-        writeTF(key, item);
+    switch (key.reducer) {
+      case TF:
+        // Go through all the words for the ID
+        for (StringDoubleValue item : values) {
+          writeTF(key, item);
 
-      }
-    } else if( key.reducer.equals(IDF)){
-      // Find the number of ID that have the same word
-      int count = 0;
-      for (StringDoubleValue item : values) {
-        count++;
-      }
+        }
+        break;
+      case IDF:
+        // Find the number of ID that have the same word
+        int count = getCount(values);
 
-      writeIDF(key, count);
+        writeIDF(key, count);
 
-    } else {
-      // Fail when a key is not sent to the correct reducer
-      throw new RuntimeException(key.reducer);
+        break;
+      default:
+        // Fail when a key is not sent to the correct reducer
+        throw new RuntimeException(key.reducer);
     }
+  }
+
+  /**
+   * Gets the number of ID's the word was in
+   * @param values the Id's of the word
+   * @return the count
+   */
+  private int getCount(Iterable<StringDoubleValue> values) {
+    int count = 0;
+    for (StringDoubleValue item : values) {
+      count++;
+    }
+    return count;
   }
 
   /**
