@@ -23,9 +23,6 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
    */
   public Double tfValue;
 
-
-
-
   /**
    * Writes the state values to hadoop file system
    * @param dataOutput DataOutput to serialize this object into.
@@ -71,13 +68,28 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
    */
   @Override
   public boolean equals(Object o) {
+    boolean isEqual = false;
     if (o instanceof WordTermFrequency) {
       WordTermFrequency obj = (WordTermFrequency) o;
-      // Check if same ID
-      if (this.id.equals(obj.id)) {
-        if(this.word.equals(obj.word)){
-          return this.tfValue.equals(obj.tfValue);
-        }
+      isEqual = isEqual(obj);
+
+
+    }
+    return isEqual;
+  }
+
+  /**
+   * Checks if the all the values for the two WordTermFrequency are the same
+   * @param obj the other object to check
+   * @return if the all the values for the two WordTermFrequency are the same
+   */
+  private boolean isEqual( WordTermFrequency obj) {
+    // Check if same ID
+    if (this.id.equals(obj.id)) {
+      // Check if the word is the same
+      if(this.word.equals(obj.word)){
+        // Check if the TF value is the same
+        return tfValue.equals(obj.tfValue);
       }
     }
     return false;
@@ -90,10 +102,6 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
    */
   @Override
   public int compareTo(WordTermFrequency o){
-    if(o == null)
-    {
-      throw new NullPointerException();
-    }
     int compare = this.id.compareTo(o.id);
     if(compare == 0){
       compare = this.word.compareTo(o.word);
