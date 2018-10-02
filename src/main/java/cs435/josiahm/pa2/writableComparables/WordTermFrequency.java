@@ -5,16 +5,35 @@ import java.io.DataOutput;
 import java.io.IOException;
 import org.apache.hadoop.io.WritableComparable;
 
+/**
+ * Reads the TF values from the file in Job 1
+ */
 public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
 
+  /**
+   * The article ID of the word
+   */
   public String id;
+  /**
+   * The word from the article
+   */
   public String word;
+  /**
+   * The term frequency value for the word in the article
+   */
   public Double tfValue;
 
-
-
+  /**
+   * Compares the WordTermFrequency first by ID, then word, and finally the TF value.
+   * @param o the JobOneKey to compare to
+   * @return the ascending  order of ID, word, and TF value
+   */
   @Override
-  public int compareTo(WordTermFrequency o) {
+  public int compareTo(WordTermFrequency o){
+    if(o == null)
+    {
+      throw new NullPointerException();
+    }
     int compare = this.id.compareTo(o.id);
     if(compare == 0){
       compare = this.word.compareTo(o.word);
@@ -26,6 +45,11 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
   }
 
 
+  /**
+   * Writes the state values to hadoop file system
+   * @param dataOutput DataOutput to serialize this object into.
+   * @throws IOException Invalid writes
+   */
   @Override
   public void write(DataOutput dataOutput) throws IOException {
 
@@ -35,6 +59,11 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
 
   }
 
+  /**
+   * Reads the info from hadoop file system to fill in the values
+   * @param dataInput DataInput to deseriablize this object from.
+   * @throws IOException Invalid reads
+   */
   @Override
   public void readFields(DataInput dataInput) throws IOException {
 
@@ -44,27 +73,21 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
 
   }
 
-  @Override
-  public String toString(){
-    return id + "\t" + word + "\t" + tfValue;
-  }
-
   /**
-   * The hash code of the key
+   * The hash code of the combined hashes of ID, word, and tfValue
    * @return hash code of the key
    */
   @Override
   public int hashCode(){
-    return word.hashCode();
+    Long hash = (long) (id.hashCode() + word.hashCode() + tfValue.hashCode());
+    return hash.hashCode();
   }
 
-
   /**
-   * Compare if two StringDoubleValue's have the same id The question should not matter because the
-   * partitioner should have already split the StringDoubleValue's to the correct reducers
+   * Compare if two WordTermFrequency's have the same id, then word, and finally TF value
    *
-   * @param o other JobOneKey to check
-   * @return if the id's are the same
+   * @param o other WordTermFrequency to check
+   * @return if the ID, word, and TF value are the same
    */
   @Override
   public boolean equals(Object o) {
@@ -80,4 +103,8 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
     return false;
   }
 
+  @Override
+  public String toString(){
+    return id + "\t" + word + "\t" + tfValue;
+  }
 }
