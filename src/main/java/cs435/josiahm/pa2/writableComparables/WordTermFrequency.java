@@ -23,26 +23,7 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
    */
   public Double tfValue;
 
-  /**
-   * Compares the WordTermFrequency first by ID, then word, and finally the TF value.
-   * @param o the JobOneKey to compare to
-   * @return the ascending  order of ID, word, and TF value
-   */
-  @Override
-  public int compareTo(WordTermFrequency o){
-    if(o == null)
-    {
-      throw new NullPointerException();
-    }
-    int compare = this.id.compareTo(o.id);
-    if(compare == 0){
-      compare = this.word.compareTo(o.word);
-    }
-    if(compare == 0){
-      compare = this.tfValue.compareTo(o.tfValue);
-    }
-    return compare;
-  }
+
 
 
   /**
@@ -85,7 +66,6 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
 
   /**
    * Compare if two WordTermFrequency's have the same id, then word, and finally TF value
-   *
    * @param o other WordTermFrequency to check
    * @return if the ID, word, and TF value are the same
    */
@@ -101,6 +81,27 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
       }
     }
     return false;
+  }
+
+  /**
+   * Compares the WordTermFrequency first by ID, then word, and finally the TF value.
+   * @param o the JobOneKey to compare to
+   * @return the ascending  order of ID, word, and TF value
+   */
+  @Override
+  public int compareTo(WordTermFrequency o){
+    if(o == null)
+    {
+      throw new NullPointerException();
+    }
+    int compare = this.id.compareTo(o.id);
+    if(compare == 0){
+      compare = this.word.compareTo(o.word);
+    }
+    if(compare == 0){
+      compare = this.tfValue.compareTo(o.tfValue);
+    }
+    return compare;
   }
 
   @Override
