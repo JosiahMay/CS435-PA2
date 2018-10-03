@@ -48,7 +48,6 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
     this.id = dataInput.readUTF();
     this.word = dataInput.readUTF();
     this.tfValue = dataInput.readDouble();
-
   }
 
   /**
