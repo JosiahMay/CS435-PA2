@@ -3,6 +3,7 @@ package cs435.josiahm.pa2.writableComparables;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
@@ -48,6 +49,18 @@ public class WordTermFrequency implements WritableComparable<WordTermFrequency>{
     this.id = dataInput.readUTF();
     this.word = dataInput.readUTF();
     this.tfValue = dataInput.readDouble();
+  }
+
+  /**
+   * Sets the values for WordTermFrequency
+   * @param id the id of the word
+   * @param word the word
+   * @param tfValue the TF value of the word
+   */
+  public void set(String id, String word, Double tfValue){
+    this.id = id;
+    this.word = word;
+    this.tfValue = tfValue;
   }
 
   /**

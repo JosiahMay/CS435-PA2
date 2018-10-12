@@ -1,5 +1,6 @@
 package cs435.josiahm.pa2.drivers;
 
+import cs435.josiahm.pa2.combiners.JobOneCombiner;
 import cs435.josiahm.pa2.mappers.JobOneMapper;
 import cs435.josiahm.pa2.reducers.JobOneReducer;
 import cs435.josiahm.pa2.writableComparables.JobOneKey;
@@ -25,6 +26,7 @@ public class JobOneDriver {
     Configuration conf = new Configuration();
     conf.set("OutPutDirectory", args[1] + "/Job1");
     Job job = Job.getInstance(conf, "Part 1, TF and IDF");
+    job.setReduceSpeculativeExecution(false);
 
     // Setup Mapper
     job.setJarByClass(JobOneDriver.class);
@@ -32,6 +34,8 @@ public class JobOneDriver {
 
     job.setMapOutputKeyClass(JobOneKey.class);
     job.setMapOutputValueClass(StringDoubleValue.class);
+
+    job.setCombinerClass(JobOneCombiner.class);
 
     // Setup Reducer
     job.setReducerClass(JobOneReducer.class);
@@ -42,6 +46,8 @@ public class JobOneDriver {
         .addNamedOutput(job, "TF", TextOutputFormat.class, Text.class, DoubleWritable.class);
     MultipleOutputs
         .addNamedOutput(job, "IDF", TextOutputFormat.class, Text.class, DoubleWritable.class);
+    MultipleOutputs
+        .addNamedOutput(job, "MissLabeled", TextOutputFormat.class, Text.class, DoubleWritable.class);
 
     // Setup path arguments
     Path input = new Path(args[0]);

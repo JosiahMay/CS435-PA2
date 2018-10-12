@@ -91,7 +91,9 @@ public class JobOneKey implements WritableComparable<JobOneKey> {
     if(o instanceof JobOneKey){
       JobOneKey obj = (JobOneKey)o;
 
-      return this.key.equals(obj.key);
+      if( this.key.equals(obj.key)){
+        return this.reducer.equals(obj.reducer);
+      }
     }
     return false;
   }
@@ -105,7 +107,11 @@ public class JobOneKey implements WritableComparable<JobOneKey> {
   public int compareTo(JobOneKey o) {
     if(o == null)
       throw new NullPointerException();
-    return this.key.compareTo(o.key);
+    int compare = this.key.compareTo(o.key);
+    if(compare == 0){
+      compare = this.reducer.compareTo(o.reducer);
+    }
+    return compare;
   }
 
 

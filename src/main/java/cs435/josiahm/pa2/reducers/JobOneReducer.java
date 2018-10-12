@@ -95,13 +95,18 @@ public class JobOneReducer extends Reducer<JobOneKey, StringDoubleValue, Text, D
       case TF:
         // Go through all the words for the ID
         for (StringDoubleValue item : values) {
+          if(item.id.equals("IDF VALUE"))
+          {
+            mos.write("MissLabeled", new Text(key.key + "\t" + key.reducer + "\t" + item.id), new DoubleWritable(item.value));
+            return;
+          }
           writeTF(key, item);
 
         }
         break;
       case IDF:
         // Find the number of ID that have the same word
-        int count = getCount(values);
+        double count = getCount(values);
 
         writeIDF(key, count);
 
@@ -117,10 +122,10 @@ public class JobOneReducer extends Reducer<JobOneKey, StringDoubleValue, Text, D
    * @param values the Id's of the word
    * @return the count
    */
-  private int getCount(Iterable<StringDoubleValue> values) {
-    int count = 0;
+  private double getCount(Iterable<StringDoubleValue> values) {
+    double count = 0;
     for (StringDoubleValue item : values) {
-      count++;
+      count += item.value;
     }
     return count;
   }
@@ -132,7 +137,7 @@ public class JobOneReducer extends Reducer<JobOneKey, StringDoubleValue, Text, D
    * @throws IOException unable to write to HDFS
    * @throws InterruptedException program interrupted
    */
-  private void writeIDF(JobOneKey key, int count) throws IOException, InterruptedException {
+  private void writeIDF(JobOneKey key, double count) throws IOException, InterruptedException {
     // Set outputs
     outputKey.set(key.key);
     outputValue.set(Math.log(totalIds/count)); // IDF value

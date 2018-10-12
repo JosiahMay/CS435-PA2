@@ -30,7 +30,7 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
     outputKeyIDF.setReducer("IDF");
     outputKeyTF.setReducer("TF");
 
-    outputValueIDF.set("-1", 1.0);
+    outputValueIDF.set("IDF VALUE", 1.0);
 
   }
 
@@ -98,7 +98,7 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
     if (value.toString().isEmpty()) {
       rt = false;
     }
-    // Check if the ID has not article
+    // Check if the ID has no article
     if(!entry.set(value.toString())) {
       rt = false;
     }
