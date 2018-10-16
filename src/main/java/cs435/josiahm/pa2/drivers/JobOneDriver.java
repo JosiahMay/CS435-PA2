@@ -1,67 +1,107 @@
 package cs435.josiahm.pa2.drivers;
 
-import cs435.josiahm.pa2.combiners.JobOneCombiner;
-import cs435.josiahm.pa2.mappers.JobOneMapper;
-import cs435.josiahm.pa2.reducers.JobOneReducer;
-import cs435.josiahm.pa2.writableComparables.JobOneKey;
-import cs435.josiahm.pa2.writableComparables.StringDoubleValue;
+import cs435.josiahm.pa2.combiners.JobOneCombinerIDF;
+import cs435.josiahm.pa2.mappers.JobOneMapperIDF;
+import cs435.josiahm.pa2.mappers.JobOneMapperTF;
+import cs435.josiahm.pa2.reducers.JobOneReducerIDF;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class JobOneDriver {
+
+  /**
+   * Counts the number of document IDs with articles
+   */
+  public enum DocumentsCount {
+    NUMDOCS
+  }
 
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, InterruptedException {
 
     // Setup job
     Configuration conf = new Configuration();
-    conf.set("OutPutDirectory", args[1] + "/Job1");
-    Job job = Job.getInstance(conf, "Part 1, TF and IDF");
-    job.setReduceSpeculativeExecution(false);
+    Path input = new Path(args[0]);
+
+    // Find TF values
+    Job firstJob = Job.getInstance(conf, "Part 1, TF");
 
     // Setup Mapper
-    job.setJarByClass(JobOneDriver.class);
-    job.setMapperClass(JobOneMapper.class);
+    firstJob.setJarByClass(JobOneDriver.class);
+    firstJob.setMapperClass(JobOneMapperTF.class);
+    firstJob.setMapOutputKeyClass(Text.class);
+    firstJob.setMapOutputValueClass(Text.class);
 
-    job.setMapOutputKeyClass(JobOneKey.class);
-    job.setMapOutputValueClass(StringDoubleValue.class);
 
-    job.setCombinerClass(JobOneCombiner.class);
+    // NO Reducers
+    firstJob.setNumReduceTasks(0);
 
-    // Setup Reducer
-    job.setReducerClass(JobOneReducer.class);
-    job.setNumReduceTasks(10);
-
-    // Setup multiple outputs
-    MultipleOutputs
-        .addNamedOutput(job, "TF", TextOutputFormat.class, Text.class, DoubleWritable.class);
-    MultipleOutputs
-        .addNamedOutput(job, "IDF", TextOutputFormat.class, Text.class, DoubleWritable.class);
-    MultipleOutputs
-        .addNamedOutput(job, "MissLabeled", TextOutputFormat.class, Text.class, DoubleWritable.class);
 
     // Setup path arguments
-    Path input = new Path(args[0]);
-    Path output = new Path(args[1] + "/Job1");
+    Path outputTF = new Path(args[1] + "/Job1/TF");
 
-    FileInputFormat.addInputPath(job, input);
+    FileInputFormat.addInputPath(firstJob, input);
 
     // Remove output path if it exists
     FileSystem hdfs = FileSystem.get(conf);
+    if (hdfs.exists(outputTF)) {
+      hdfs.delete(outputTF, true);
+    }
+
+    FileOutputFormat.setOutputPath(firstJob, outputTF);
+
+    // Wait for TF job to finish
+    if(!firstJob.waitForCompletion(true)){
+      System.exit(1);
+    }
+
+    // Get the count if DOCID from the TF job
+    Counter documentCount = firstJob.getCounters().findCounter(DocumentsCount.NUMDOCS);
+
+    // Set up IDF job
+    Job secondJob = Job.getInstance(conf, "Part 1, IDF");
+
+    // Save ID count to IDF job
+    secondJob.getConfiguration().setLong(documentCount.getDisplayName(), documentCount.getValue());
+
+    // Setup Mapper
+    secondJob.setJarByClass(JobOneDriver.class);
+    secondJob.setMapperClass(JobOneMapperIDF.class);
+    secondJob.setMapOutputKeyClass(Text.class);
+    secondJob.setMapOutputValueClass(IntWritable.class);
+
+    // Set combiner
+    secondJob.setCombinerClass(JobOneCombinerIDF.class);
+
+
+    // Setup Reducer
+    secondJob.setReducerClass(JobOneReducerIDF.class);
+    secondJob.setOutputKeyClass(Text.class);
+    secondJob.setOutputValueClass(DoubleWritable.class);
+
+
+    // Setup path arguments
+    Path output = new Path(args[1] + "/Job1/IDF");
+
+    FileInputFormat.addInputPath(secondJob, input);
+
+    // Remove output path if it exists
     if (hdfs.exists(output)) {
       hdfs.delete(output, true);
     }
-    FileOutputFormat.setOutputPath(job, output);
 
-    System.exit(job.waitForCompletion(true) ? 0 : 1);
+    FileOutputFormat.setOutputPath(secondJob, output);
+
+    System.exit(secondJob.waitForCompletion(true) ? 0 : 1);
+
   }
 }
