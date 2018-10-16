@@ -30,3 +30,5 @@ fi
 # Run all jobs at Once by having 2 of them run in the background
 # This works but mixes the console outputs
 $HADOOP_HOME/bin/hadoop jar ${jar} cs435.josiahm.pa2.drivers.JobOneDriver ${input} ${output}
+$HADOOP_HOME/bin/hadoop jar ${jar} cs435.josiahm.pa2.drivers.JobTwoDriver ${output} ${output}
+$HADOOP_HOME/bin/hadoop jar ${jar} cs435.josiahm.pa2.drivers.JobThreeDriverJoin ${input} ${output}

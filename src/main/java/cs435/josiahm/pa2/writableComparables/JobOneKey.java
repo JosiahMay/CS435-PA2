@@ -48,7 +48,7 @@ public class JobOneKey implements WritableComparable<JobOneKey> {
 
   /**
    * Writes the values to hadoop file system
-   * @param dataOutput DataOuput to serialize this object into.
+   * @param dataOutput DataOutput to serialize this object into.
    * @throws IOException Invalid writes
    */
   @Override
@@ -91,15 +91,15 @@ public class JobOneKey implements WritableComparable<JobOneKey> {
     if(o instanceof JobOneKey){
       JobOneKey obj = (JobOneKey)o;
 
-      return this.key.equals(obj.key);
+      if( this.key.equals(obj.key)){
+        return this.reducer.equals(obj.reducer);
+      }
     }
     return false;
   }
 
-
   /**
-   *
-   Compares the key of one JobOneKey to another.
+   *Compares the key of one JobOneKey to another.
    * @param o the JobOneKey to compare to
    * @return the default string compare value of the two key
    */
@@ -107,7 +107,11 @@ public class JobOneKey implements WritableComparable<JobOneKey> {
   public int compareTo(JobOneKey o) {
     if(o == null)
       throw new NullPointerException();
-    return this.key.compareTo(o.key);
+    int compare = this.key.compareTo(o.key);
+    if(compare == 0){
+      compare = this.reducer.compareTo(o.reducer);
+    }
+    return compare;
   }
 
 
