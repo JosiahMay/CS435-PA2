@@ -14,8 +14,18 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+/**
+ * Finds the IDF*IF value for the corpus
+ */
 public class JobTwoDriver {
 
+  /**
+   * Finds the IDF*IF value for the corpus
+   * @param args [0] input dir, [1] output dir
+   * @throws IOException File not found or Write Error
+   * @throws ClassNotFoundException Class not found
+   * @throws InterruptedException Interrupted process
+   */
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, InterruptedException {
 
@@ -28,27 +38,18 @@ public class JobTwoDriver {
     job.setJarByClass(JobTwoDriver.class);
 
 
-    //MultipleInputs.addInputPath(job, inputTF, SequenceFileInputFormat.class, JobTwoMapper.class);
-    //MultipleInputs.addInputPath(job, inputIDF, SequenceFileInputFormat.class, JobTwoMapperIDF.class);
-
-
     // Setup Mapper
     job.setMapperClass(JobTwoMapper.class);
     job.setInputFormatClass(TFInputFormat.class);
     job.setMapOutputKeyClass(WordTermFrequency.class);
     job.setMapOutputValueClass(NullWritable.class);
 
-    // Setup Reducer
+    // No Reducer
     job.setNumReduceTasks(0);
-
-    //job.setOutputKeyClass(WordTermFrequency.class);
-    //job.setOutputValueClass(NullWritable.class);
 
 
     // Setup path arguments
     Path output = new Path(args[1] + "/Job2/IDF.TF");
-
-
 
     // Remove output path if it exists
     FileSystem hdfs = FileSystem.get(conf);

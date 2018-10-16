@@ -1,6 +1,10 @@
 package cs435.josiahm.pa2.drivers;
 
-import cs435.josiahm.pa2.mappers.JobThreeMapper;
+import cs435.josiahm.pa2.inputFormats.TFInputFormat;
+import cs435.josiahm.pa2.mappers.JobThreeMapperEntry;
+import cs435.josiahm.pa2.mappers.JobThreeMapperTerms;
+import cs435.josiahm.pa2.reducers.JobThreeReducer;
+import cs435.josiahm.pa2.writableComparables.StringDoubleValue;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -10,10 +14,22 @@ import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class JobThreeDriver {
+/**
+ * Finds the top 3 sentence of give articles and summarizes them in order of appearance
+ */
+public class JobThreeDriverJoin {
 
+  /**
+   * Finds the top 3 sentence and summarizes them in order of appearance
+   * @param args [0] articles to read dir, [1] output dir and were the IDF*TF values are
+   * @throws IOException File not found or Write Error
+   * @throws ClassNotFoundException Class not found
+   * @throws InterruptedException Interrupted process
+   */
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, InterruptedException {
 
@@ -24,16 +40,21 @@ public class JobThreeDriver {
     // Setup job
     Configuration conf = new Configuration();
     Job job = Job.getInstance(conf, "Part 3, Sentence.TF.IDF");
-    job.setJarByClass(JobThreeDriver.class);
+    job.setJarByClass(JobThreeDriverJoin.class);
+    job.setMapSpeculativeExecution(false);
 
     // Setup Mapper
-    job.setJarByClass(JobThreeDriver.class);
-    job.setMapperClass(JobThreeMapper.class);
+    MultipleInputs.addInputPath(job, inputIDFtf, TFInputFormat.class, JobThreeMapperTerms.class);
+    MultipleInputs.addInputPath(job, inputData, TextInputFormat.class, JobThreeMapperEntry.class);
+
     job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(Text.class);
+    job.setMapOutputValueClass(StringDoubleValue.class);
 
     // Setup Reducer
-    job.setNumReduceTasks(0);
+    job.setReducerClass(JobThreeReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(Text.class);
+    job.setNumReduceTasks(10);
 
     // Setup path arguments
     Path output = new Path(args[1] + "/Job3/results");

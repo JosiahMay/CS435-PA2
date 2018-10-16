@@ -16,6 +16,9 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+/**
+ * Finds the IDF and TF values of the corpus
+ */
 public class JobOneDriver {
 
   /**
@@ -25,6 +28,13 @@ public class JobOneDriver {
     NUMDOCS
   }
 
+  /**
+   * Finds the IDF and TF values of the corpus
+   * @param args [0] corpus dir, [1] output dir
+   * @throws IOException File not found or Write Error
+   * @throws ClassNotFoundException Class not found
+   * @throws InterruptedException Interrupted process
+   */
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, InterruptedException {
 
