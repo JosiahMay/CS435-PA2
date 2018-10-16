@@ -2,8 +2,8 @@ package cs435.josiahm.pa2.util;
 
 /**
  * Generic class for a tuple class
- * @param <L> A class the implements comparable
- * @param <R>A class the implements comparable
+ * @param <L> A class that implements comparable
+ * @param <R>A class that implements comparable
  */
 public class Tuple<L extends Comparable<? super L>, R extends Comparable<? super R>> {
 
