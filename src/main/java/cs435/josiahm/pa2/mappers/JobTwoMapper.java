@@ -44,13 +44,9 @@ public class JobTwoMapper extends Mapper< Object, WordTermFrequency, WordTermFre
 
       if (hdfs.exists(path)) {
 
-        BufferedReader rdr = new BufferedReader(new InputStreamReader(hdfs.open(path)));
-
-        String line = null;
-        while ((line = rdr.readLine()) != null) {
-          processWord(line);
-        }
-        rdr.close();
+        BufferedReader bfr = new BufferedReader(new InputStreamReader(hdfs.open(path)));
+        processWord(bfr);
+        bfr.close();
 
       } else {
         throw new FileNotFoundException(file.getPath());
@@ -62,13 +58,19 @@ public class JobTwoMapper extends Mapper< Object, WordTermFrequency, WordTermFre
 
   /**
    * Process each IDF value
-   * @param line the IDF value
+   * @param bfr  the buffer reader to use
+   * @throws IOException if the read fails
    */
-  private void processWord(String line) {
-    String[] parts = line.split("\t");
-    String word = parts[0];
-    Double value = Double.parseDouble(parts[1]);
-    idfValues.put(word, value);
+  private void processWord(BufferedReader bfr) throws IOException {
+
+    String line = null;
+    while ((line = bfr.readLine()) != null) {
+      String[] parts = line.split("\t");
+      String word = parts[0];
+      Double value = Double.parseDouble(parts[1]);
+      idfValues.put(word, value);
+    }
+
   }
 
 
