@@ -1,8 +1,7 @@
 package cs435.josiahm.pa2.mappers;
 
-import cs435.josiahm.pa2.util.EntryParser;
-import cs435.josiahm.pa2.util.IdCounter.TOTALS;
-import cs435.josiahm.pa2.writableComparables.JobOneKey;
+import cs435.josiahm.pa2.drivers.JobOneDriver;
+import cs435.josiahm.pa2.util.EntryWordParser;
 import cs435.josiahm.pa2.writableComparables.StringDoubleValue;
 import java.io.IOException;
 import java.util.Map.Entry;
@@ -10,29 +9,14 @@ import java.util.TreeMap;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleValue> {
+public class JobOneMapperTF extends Mapper< Object, Text, Text, StringDoubleValue> {
 
-  private final JobOneKey outputKeyIDF = new JobOneKey();
-  private final JobOneKey outputKeyTF = new JobOneKey();
-  private final StringDoubleValue outputValueIDF = new StringDoubleValue();
+  private final Text outputKeyTF = new Text();
   private final StringDoubleValue outputValueTF = new StringDoubleValue();
 
   private final TreeMap<String, Double> wordCount = new TreeMap<>();
-  private final EntryParser entry = new EntryParser();
+  private final EntryWordParser entry = new EntryWordParser();
 
-  /**
-   * Sets the reducers for the two possible outputs
-   * @param context were to write for HDFS
-   * @throws IOException unable to write to HDFS
-   * @throws InterruptedException program interrupted
-   */
-  protected void setup(Context context) throws IOException, InterruptedException {
-    outputKeyIDF.setReducer("IDF");
-    outputKeyTF.setReducer("TF");
-
-    outputValueIDF.set("IDF VALUE", 1.0);
-
-  }
 
 
   /**
@@ -52,10 +36,10 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
       return;
     }
 
-    // Add to the Total ID count
-    context.getCounter(TOTALS.ID).increment(1);
+    // Add to the Total DOCID count
+    context.getCounter(JobOneDriver.DocumentsCount.NUMDOCS).increment(1);
 
-    outputKeyTF.setKey(entry.id);
+    outputKeyTF.set(entry.id);
     // Go through each word
     while (entry.hasMoreTokens()) {
       processWord(context);
@@ -63,7 +47,7 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
     }
     calculateAndWriteTF(context);
 
-    // Clear the counts for new ID
+    // Clear the counts for new DOCID
     wordCount.clear();
 
   }
@@ -81,13 +65,12 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
     // Check if there is a value
     if(!word.isEmpty())
     {
-      writeIDF(context, word);
       addToCount(word);
     }
   }
 
   /**
-   * Checks to see if the text given is a valid document ie: Not empty and has words in the article
+   * Checks to see if the text given is a valid document ie: Not empty and has wordsToTokenize in the article
    * @param value the text to check
    * @return true if valid, false if text is empty or there is no article
    */
@@ -98,7 +81,7 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
     if (value.toString().isEmpty()) {
       rt = false;
     }
-    // Check if the ID has no article
+    // Check if the DOCID has no article
     if(!entry.set(value.toString())) {
       rt = false;
     }
@@ -107,25 +90,9 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
   }
 
 
-  /**
-   * Writes a word for IDF count if the word has not been seen before
-   * @param context how to write to HDFS
-   * @param word The word to write if it has not been seen
-   * @throws IOException unable to write to HDFS
-   * @throws InterruptedException program interrupted
-   */
-  private void writeIDF(Context context, String word)
-      throws IOException, InterruptedException {
-    // Check if the word has not already been seen in the article
-    if(!wordCount.containsKey(word))
-    {
-      outputKeyIDF.setKey(word);
-      context.write(outputKeyIDF, outputValueIDF);
-    }
-  }
 
   /**
-   * Calculates the TF for every word in the document and outputs (ID, (word, TF)) to the reducer
+   * Calculates the TF for every word in the document and outputs (DOCID, (word, TF)) to the reducer
    * @param context were to write for HDFS
    * @throws IOException unable to write to HDFS
    * @throws InterruptedException program interrupted
@@ -158,7 +125,7 @@ public class JobOneMapper extends Mapper< Object, Text, JobOneKey, StringDoubleV
   }
 
   /**
-   * Outputs all the words and TF value for all the words in the document
+   * Outputs all the wordsToTokenize and TF value for all the wordsToTokenize in the document
    * @param word the word
    * @param tf the tf value
    * @param context were to write for HDFS

@@ -1,36 +1,34 @@
 package cs435.josiahm.pa2.mappers;
 
-import cs435.josiahm.pa2.writableComparables.InvertedDocumentFrequency;
-import cs435.josiahm.pa2.writableComparables.StringDoubleValue;
 import cs435.josiahm.pa2.writableComparables.WordTermFrequency;
 import java.io.BufferedReader;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.Map.Entry;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
+/**
+ * Reads All the TF values and calculates the IDF*TF value
+ */
 public class JobTwoMapper extends Mapper< Object, WordTermFrequency, WordTermFrequency, NullWritable> {
 
+  /**
+   * Null for output value
+   */
   private NullWritable nullOutput;
+  /**
+   * All the IDF values from cache
+   */
   private HashMap<String, Double> idfValues = new HashMap<>();
 
   @Override
   /**
-   * Sets the reducers for the two possible outputs
+   * Reads the IDF values from cache
    * @param context were to write for HDFS
    * @throws IOException unable to write to HDFS
    * @throws InterruptedException program interrupted
@@ -62,6 +60,10 @@ public class JobTwoMapper extends Mapper< Object, WordTermFrequency, WordTermFre
 
   }
 
+  /**
+   * Process each IDF value
+   * @param line the IDF value
+   */
   private void processWord(String line) {
     String[] parts = line.split("\t");
     String word = parts[0];
@@ -70,6 +72,14 @@ public class JobTwoMapper extends Mapper< Object, WordTermFrequency, WordTermFre
   }
 
 
+  /**
+   * Reads All the TF values and calculates the IDF*TF value
+   * @param key unused
+   * @param value the TF value
+   * @param context were to write for HDFS
+   * @throws IOException unable to write to HDFS
+   * @throws InterruptedException program interrupted
+   */
   public void map(Object key, WordTermFrequency value, Context context)
       throws IOException, InterruptedException {
 
@@ -77,7 +87,7 @@ public class JobTwoMapper extends Mapper< Object, WordTermFrequency, WordTermFre
       value.tfValue = value.tfValue * idfValues.get(value.word);
       context.write(value, nullOutput);
     } else {
-      throw new RuntimeException("missing words" + value.toString());
+      throw new RuntimeException("missing wordsToTokenize" + value.toString());
     }
   }
 

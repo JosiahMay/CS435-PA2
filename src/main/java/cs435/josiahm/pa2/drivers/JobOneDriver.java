@@ -97,7 +97,7 @@ public class JobOneDriver {
     secondJob.setReducerClass(JobOneReducerIDF.class);
     secondJob.setOutputKeyClass(Text.class);
     secondJob.setOutputValueClass(DoubleWritable.class);
-
+    secondJob.setNumReduceTasks(10);
 
     // Setup path arguments
     Path output = new Path(args[1] + "/Job1/IDF");
