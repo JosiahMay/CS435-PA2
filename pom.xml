@@ -9,6 +9,7 @@
   <version>1.0</version>
 
   <dependencies>
+
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
