@@ -6,8 +6,8 @@ import java.io.IOException;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
- * This class holds a String and Double for the document ID, IDF, and TF values
- * if if is just the IDF value ID = "-1";
+ * This class holds a String and Double for the document DOCID, IDF, and TF values
+ * if if is just the IDF value DOCID = "-1";
  */
 public class StringDoubleValue implements WritableComparable<StringDoubleValue> {
 
@@ -96,7 +96,7 @@ public class StringDoubleValue implements WritableComparable<StringDoubleValue> 
   public boolean equals(Object o) {
     if (o instanceof StringDoubleValue) {
       StringDoubleValue obj = (StringDoubleValue) o;
-      // Check if same ID
+      // Check if same DOCID
       if (this.id.equals(obj.id)) {
         return this.value.equals(obj.value);
       }
@@ -115,10 +115,10 @@ public class StringDoubleValue implements WritableComparable<StringDoubleValue> 
   public int compareTo(StringDoubleValue o) {
     if (o == null)
       throw new NullPointerException();
-    // First compare ID
+    // First compare DOCID
     int compare = this.id.compareTo(o.id);
     if (compare == 0) {
-      // If ID == ID then compare value
+      // If DOCID == DOCID then compare value
       compare = this.value.compareTo(o.value);
     }
 
