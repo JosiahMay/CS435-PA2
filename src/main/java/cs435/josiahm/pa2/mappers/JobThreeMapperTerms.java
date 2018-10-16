@@ -30,7 +30,6 @@ public class JobThreeMapperTerms  extends Mapper< Object, WordTermFrequency, Tex
    */
   public void map(Object key, WordTermFrequency value, Context context)
       throws IOException, InterruptedException {
-
     outputKey.set(value.id);
     outputValue.set(value.word, value.tfValue);
     context.write(outputKey, outputValue);
